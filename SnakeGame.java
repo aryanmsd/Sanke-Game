@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -17,11 +18,19 @@ public class SnakeGame extends JPanel implements ActionListener {
     private boolean running = true;
     private Timer timer;
     private int score = 0;
+    private JLabel scoreLabel;
     
     public SnakeGame() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(BLACK);
         setFocusable(true);
+        setLayout(new BorderLayout());
+        
+        scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
+        scoreLabel.setForeground(Color.WHITE);
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        add(scoreLabel, BorderLayout.NORTH);
+        
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -62,6 +71,7 @@ public class SnakeGame extends JPanel implements ActionListener {
         if (snake.contains(newHead) || newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
             running = false;
             timer.stop();
+            saveScore();
             JOptionPane.showMessageDialog(this, "Game Over! Your Score: " + score);
             return;
         }
@@ -70,9 +80,18 @@ public class SnakeGame extends JPanel implements ActionListener {
         
         if (newHead.equals(food)) {
             score++;
+            scoreLabel.setText("Score: " + score);
             spawnFood();
         } else {
             snake.removeLast();
+        }
+    }
+    
+    private void saveScore() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("scoreboard.txt", true))) {
+            writer.write("Score: " + score + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     
@@ -114,4 +133,3 @@ public class SnakeGame extends JPanel implements ActionListener {
         frame.setVisible(true);
     }
 }
-
